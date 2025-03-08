@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Pedido</title>
     <link rel="stylesheet" href="pedidos.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -34,67 +35,97 @@
             </select>
 
             <button onclick="crearPedido()">Crear Pedido</button>
-            </div>
+        </div>
     </div>
 
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"
-        integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+"
+        integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" 
         crossorigin="anonymous"></script>
 
     <script>
-            const socket = io("http://localhost:3000");
+        const socket = io("http://localhost:3000");
 
-            socket.on("connect", () => {
-                console.log(socket.id);
+        socket.on("connect", () => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Conexión exitosa',
+                text: `Conectado con el ID: ${socket.id}`,
             });
+        });
 
-            socket.on("disconnect", () => {
-                console.log(socket.id);
+        socket.on("disconnect", () => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Desconectado',
+                text: `Desconectado con el ID: ${socket.id}`,
             });
+        });
 
-            socket.on("new-order", (data) => {
-                console.log(data);
+        socket.on("new-order", (data) => {
+            Swal.fire({
+                icon: 'info',
+                title: 'Nuevo Pedido',
+                text: `Nuevo pedido recibido: ${JSON.stringify(data)}`,
             });
+        });
 
-            socket.on("new-payment", (data) => {
-                console.log("se ha procesado el pago de la orden:", data);});
+        socket.on("new-payment", (data) => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Pago Procesado',
+                text: `El pago de la orden ha sido procesado: ${JSON.stringify(data)}`,
+            });
+        });
 
-            const orderResult = document.getElementById('order-result');
-            const btnCreateOrder = document.getElementById('btn-crear-orden');
+        const orderResult = document.getElementById('order-result');
+        const btnCreateOrder = document.getElementById('btn-crear-orden');
 
-            function crearPedido() {
-                const userId = Number(document.getElementById('user_id').value);
-                const productId = Number(document.getElementById('product_id').value);
-                const totalPrice = Number(document.getElementById('total_price').value);
-                const status = document.getElementById('status').value;
+        function crearPedido() {
+            const userId = Number(document.getElementById('user_id').value);
+            const productId = Number(document.getElementById('product_id').value);
+            const totalPrice = Number(document.getElementById('total_price').value);
+            const status = document.getElementById('status').value;
 
-                const order = {
-                    user_id: userId,
-                    product_id: productId,
-                    total_price: totalPrice,
-                    status: status
-                };
+            const order = {
+                user_id: userId,
+                product_id: productId,
+                total_price: totalPrice,
+                status: status
+            };
 
-                fetch('http://localhost:8080/orders/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(order)
-                }).then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            orderResult.innerHTML = '<p>Pedido creado exitosamente!</p>';
-                        } else {
-                            orderResult.innerHTML = '<p>Error al crear el pedido</p>';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error creando orden:', error);
-                        orderResult.innerHTML = '<p>Error al crear el pedido pelona .</p>';
+           
+            fetch('http://localhost:8083/orders/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(order)
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Pedido Creado',
+                            text: 'El pedido se ha creado exitosamente.',
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Hubo un error al crear el pedido.',
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error creando orden:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error al crear el pedido. Intenta nuevamente.',
                     });
-            }
-</script>
+                });
+        }
+    </script>
 </body>
 
 </html>
