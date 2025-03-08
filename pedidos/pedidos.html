@@ -38,14 +38,13 @@
         </div>
     </div>
 
-    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"
-        integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" 
-        crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" crossorigin="anonymous"></script>
 
     <script>
         const socket = io("http://localhost:3000");
 
         socket.on("connect", () => {
+            console.log("Conectado con el ID: ", socket.id);
             Swal.fire({
                 icon: 'success',
                 title: 'Conexión exitosa',
@@ -54,6 +53,7 @@
         });
 
         socket.on("disconnect", () => {
+            console.log("Desconectado con el ID: ", socket.id);
             Swal.fire({
                 icon: 'error',
                 title: 'Desconectado',
@@ -62,6 +62,7 @@
         });
 
         socket.on("new-order", (data) => {
+            console.log('Nuevo pedido recibido:', data);
             Swal.fire({
                 icon: 'info',
                 title: 'Nuevo Pedido',
@@ -70,15 +71,13 @@
         });
 
         socket.on("new-payment", (data) => {
+            console.log('Pago procesado:', data);
             Swal.fire({
                 icon: 'success',
                 title: 'Pago Procesado',
                 text: `El pago de la orden ha sido procesado: ${JSON.stringify(data)}`,
             });
         });
-
-        const orderResult = document.getElementById('order-result');
-        const btnCreateOrder = document.getElementById('btn-crear-orden');
 
         function crearPedido() {
             const userId = Number(document.getElementById('user_id').value);
@@ -93,7 +92,6 @@
                 status: status
             };
 
-           
             fetch('http://localhost:8083/orders/', {
                 method: 'POST',
                 headers: {
