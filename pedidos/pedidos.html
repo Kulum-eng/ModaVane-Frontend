@@ -61,15 +61,6 @@
             });
         });
 
-        socket.on("new-order", (data) => {
-            console.log('Nuevo pedido recibido:', data);
-            Swal.fire({
-                icon: 'info',
-                title: 'Nuevo Pedido',
-                text: `Nuevo pedido recibido: ${JSON.stringify(data)}`,
-            });
-        });
-
         socket.on("new-payment", (data) => {
             console.log('Pago procesado:', data);
             Swal.fire({
