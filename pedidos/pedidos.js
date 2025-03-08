@@ -1,4 +1,3 @@
-
 const socket = io();
 
 const orderForm = document.getElementById('order-form');
@@ -19,7 +18,23 @@ orderForm.addEventListener('submit', function(event) {
         status: status
     };
 
-    socket.emit('create-order', order);
-
-    orderResult.innerHTML = '<p>Pedido creado exitosamente!</p>';
+    fetch('http://localhost:8080/orders/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(order)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            orderResult.innerHTML = '<p>Pedido creado exitosamente!</p>';
+        } else {
+            orderResult.innerHTML = '<p>Error al crear el pedido</p>';
+        }
+    })
+    .catch(error => {
+        console.error('Error creande orden:', error);
+        orderResult.innerHTML = '<p>Error al crear el pedido pelona .</p>';
+    });
 });
