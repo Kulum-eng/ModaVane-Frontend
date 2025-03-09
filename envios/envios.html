@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Pago</title>
+    <link rel="stylesheet" href="pagos.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+    <div class="landing-page">
+        <h1>Bienvenido a ModaVane</h1>
+        <p>Crea tu pago llenando los siguientes detalles:</p>
+        <a href="pagos.html" class="create-payment-button">Crear Pago</a>
+    </div>
+
+    <div class="payment-form-container" id="paymentFormContainer">
+        <h2>Crear Pago</h2>
+        <div>
+            <label for="orderId">ID Orden:</label>
+            <input type="number" id="order_id">
+
+            <label for="amount">Monto:</label>
+            <input type="number" id="amount">
+
+            <label for="paymentMethod">Método de Pago:</label>
+            <select id="payment_method">
+                <option value="tarjeta">Tarjeta</option>
+                <option value="paypal">PayPal</option>
+            </select>
+
+            <button onclick="crearPago()">Crear Pago</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" crossorigin="anonymous"></script>
+
+    <script>
+        const socket = io("http://localhost:3000");
+
+        socket.on("connect", () => {
+            console.log("Conectado con el ID: ", socket.id);
+            Swal.fire({
+                icon: 'success',
+                title: 'Conexión exitosa',
+                text: `Conectado con el ID: ${socket.id}`,
+            });
+        });
+
+        socket.on("disconnect", () => {
+            console.log("Desconectado con el ID: ", socket.id);
+            Swal.fire({
+                icon: 'error',
+                title: 'Desconectado',
+                text: `Desconectado con el ID: ${socket.id}`,
+            });
+        });
+
+        socket.on("new-shipment", (data) => {
+            console.log('Pago procesado:', data);
+            Swal.fire({
+                icon: 'success',
+                title: 'Pago Procesado',
+                text: `El pago de la orden ha sido procesado: ${JSON.stringify(data)}`,
+            });
+        });
+
+        function crearPago() {
+            const orderId = Number(document.getElementById('order_id').value);
+            const amount = Number(document.getElementById('amount').value);
+            const paymentMethod = document.getElementById('payment_method').value;
+
+            const payment = {
+                order_id: orderId,
+                amount: amount,
+                payment_method: paymentMethod
+            };
+
+            fetch('http://localhost:8080/payments/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payment)
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Pago Creado',
+                            text: 'El pago se ha creado exitosamente.',
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Hubo un error al crear el pago.',
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error creando pago:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error al crear el pago. Intenta nuevamente.',
+                    });
+                });
+        }
+    </script>
+</body>
+
+</html>
